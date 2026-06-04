@@ -34,6 +34,9 @@
 - HTTP client 使用 `github.com/go-resty/resty/v2`。
 - Redis 使用 `github.com/redis/go-redis/v9`。
 - GORM 只用于数据库连接封装。
+- `db` 包必须保持 GORM 默认表名约定，不配置 `NamingStrategy.SingularTable = true`。
+- `db` 包不得执行 `AutoMigrate`，生产表结构只能由领域项目 migration 管理。
+- 数据库表结构、GORM model 和 migration 规则以 `data-schema-standards` 为准。
 - 不提交真实 `.env`、token、secret、证书、私钥。
 
 ## 完成前检查
@@ -45,4 +48,3 @@ go vet ./...
 ```
 
 如果新增包，必须同步更新 README 的包列表。
-

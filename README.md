@@ -14,7 +14,7 @@
 | `errno` | 通用业务错误类型 |
 | `response` | Gin 统一 JSON 响应 envelope |
 | `middleware` | Gin request id、access log 中间件 |
-| `db` | PostgreSQL / GORM 连接初始化和关闭 |
+| `db` | PostgreSQL / GORM 连接初始化和关闭；不管理 schema 和 migration |
 | `redis` | go-redis client 初始化和 TTL 写入封装 |
 | `httpclient` | Resty HTTP client，自动透传 `X-Request-Id` |
 | `observability` | 健康检查数据结构和依赖探测 |
@@ -28,6 +28,8 @@
 - Redis 临时 key 必须通过带 TTL 的方法写入。
 - 日志、HTTP client、事件发布都必须透传或打印 `request_id`。
 - 对外 API 响应必须使用统一 envelope。
+- `db` 包只负责连接初始化，不配置 `SingularTable`，不执行 `AutoMigrate`。
+- 数据库表结构、GORM model 和 migration 以 [euglena-inc/data-schema-standards](https://github.com/euglena-inc/data-schema-standards) 为准。
 
 ## 本地检查
 
@@ -46,4 +48,3 @@ go vet ./...
 ## 标准来源
 
 公司级标准仓库：[euglena-inc/data-schema-standards](https://github.com/euglena-inc/data-schema-standards)
-
