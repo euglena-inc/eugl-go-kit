@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.x"
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Format check
+        run: |
+          go fmt ./...
+          git diff --exit-code
+
+      - name: Test
+        run: go test ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Sensitive file check
+        run: |
+          if find . \
+            -path ./.git -prune -o \
+            -type f \( -name "*.pem" -o -name "*.key" -o -name "*.p12" -o -name "*.pfx" -o -name ".env" \) \
+            -print | grep -q .; then
+            echo "发现禁止提交的敏感文件"
+            exit 1
+          fi
+
