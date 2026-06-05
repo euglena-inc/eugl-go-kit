@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	goredis "github.com/redis/go-redis/v9"
@@ -44,4 +45,33 @@ func SetNXWithTTL(ctx context.Context, client *goredis.Client, key string, value
 		return false, fmt.Errorf("redis ttl must be positive")
 	}
 	return client.SetNX(ctx, key, value, ttl).Result()
+}
+
+func Close(client *goredis.Client) error {
+	if client == nil {
+		return nil
+	}
+	return client.Close()
+}
+
+func Key(prefix string, parts ...interface{}) string {
+	segments := make([]string, 0, len(parts)+1)
+	if prefix = strings.Trim(prefix, ":"); prefix != "" {
+		segments = append(segments, prefix)
+	}
+	for _, part := range parts {
+		value := strings.Trim(fmt.Sprint(part), ":")
+		if value != "" {
+			segments = append(segments, value)
+		}
+	}
+	return strings.Join(segments, ":")
+}
+
+func KeyPrefix(prefix string, parts ...interface{}) string {
+	key := Key(prefix, parts...)
+	if key == "" {
+		return ""
+	}
+	return key + ":"
 }
