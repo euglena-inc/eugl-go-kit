@@ -15,7 +15,7 @@
 | `response` | Gin 统一 JSON 响应 envelope |
 | `middleware` | Gin request id、access log 中间件 |
 | `db` | PostgreSQL / GORM 连接初始化和关闭；不管理 schema 和 migration |
-| `redis` | go-redis client 初始化和 TTL 写入封装 |
+| `redis` | go-redis client 初始化、关闭、TTL 写入和 Redis key 基础拼接 |
 | `httpclient` | Resty HTTP client，自动透传 `X-Request-Id` |
 | `observability` | 健康检查数据结构和依赖探测 |
 | `event` | 跨领域事件 envelope 和 publisher 接口 |
@@ -26,6 +26,7 @@
 - 不能放任何餐饮业务逻辑。
 - 不能放订单、餐品、门店、会员、营销、支付等领域对象。
 - Redis 临时 key 必须通过带 TTL 的方法写入。
+- Redis client 关闭、TTL 写入和无业务含义的 key 拼接统一使用 `redis` 包；业务服务只保留 key 前缀、TTL 策略和失效语义。
 - 日志、HTTP client、事件发布都必须透传或打印 `request_id`。
 - 对外 API 响应必须使用统一 envelope。
 - `db` 包只负责连接初始化，不配置 `SingularTable`，不执行 `AutoMigrate`。
