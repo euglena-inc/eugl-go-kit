@@ -1,6 +1,7 @@
 package httpclient
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -11,6 +12,13 @@ import (
 type Options struct {
 	BaseURL string
 	Timeout time.Duration
+}
+
+type Envelope[T any] struct {
+	Code      int    `json:"code"`
+	Message   string `json:"message"`
+	Data      T      `json:"data"`
+	RequestID string `json:"request_id"`
 }
 
 func New(options Options) *resty.Client {
@@ -33,4 +41,13 @@ func New(options Options) *resty.Client {
 	})
 
 	return client
+}
+
+func UpstreamError(service string, messages ...string) error {
+	for _, message := range messages {
+		if message != "" {
+			return fmt.Errorf("%s upstream error: %s", service, message)
+		}
+	}
+	return fmt.Errorf("%s upstream error", service)
 }
