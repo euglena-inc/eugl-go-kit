@@ -14,6 +14,10 @@ func AccessLog(log *slog.Logger) gin.HandlerFunc {
 		start := time.Now()
 		c.Next()
 
+		if isHealthCheckPath(c.Request.URL.Path) {
+			return
+		}
+
 		attrs := []slog.Attr{
 			slog.String("request_id", requestid.FromContext(c.Request.Context())),
 			slog.String("method", c.Request.Method),
@@ -25,7 +29,32 @@ func AccessLog(log *slog.Logger) gin.HandlerFunc {
 		attrs = appendCommonBusinessIDs(c, attrs)
 
 		log.LogAttrs(c.Request.Context(), slog.LevelInfo, "http_request", attrs...)
+		if c.Writer.Status() >= 400 || len(c.Errors) > 0 {
+			errorAttrs := append([]slog.Attr{}, attrs...)
+			if errText := ginErrorText(c); errText != "" {
+				errorAttrs = append(errorAttrs, slog.String("error", errText))
+			}
+			level := slog.LevelWarn
+			if c.Writer.Status() >= 500 {
+				level = slog.LevelError
+			}
+			log.LogAttrs(c.Request.Context(), level, "http_error", errorAttrs...)
+		}
 	}
+}
+
+func ginErrorText(c *gin.Context) string {
+	if len(c.Errors) == 0 {
+		return ""
+	}
+	if last := c.Errors.Last(); last != nil && last.Err != nil {
+		return last.Err.Error()
+	}
+	return ""
+}
+
+func isHealthCheckPath(path string) bool {
+	return path == "/healthz" || path == "/readyz"
 }
 
 func appendCommonBusinessIDs(c *gin.Context, attrs []slog.Attr) []slog.Attr {
