@@ -15,6 +15,7 @@
 - Redis client、关闭、TTL 和 key 拼接基础方法。
 - Resty HTTP client。
 - 健康检查和可观测性基础结构。
+- `/readyz` 依赖状态变化日志和额外依赖探测注册。
 - 跨领域事件 envelope 和 publisher interface。
 
 禁止放入：
@@ -34,6 +35,8 @@
 - HTTP client 使用 `github.com/go-resty/resty/v2`。
 - Redis 使用 `github.com/redis/go-redis/v9`。
 - Redis client 关闭、TTL 写入和无业务含义的 key 拼接统一放在 `redis` 包；具体业务 key 前缀、TTL 策略和失效语义留在领域服务。
+- Access log 必须带 `request_id`，并尽量自动提取 `brand_id`、`store_id`、`order_no` 等常见排障字段。
+- Health readiness 必须在依赖 down 和 down 后恢复时打印结构化日志。
 - GORM 只用于数据库连接封装。
 - `db` 包必须保持 GORM 默认表名约定，不配置 `NamingStrategy.SingularTable = true`。
 - `db` 包不得执行 `AutoMigrate`，生产表结构只能由领域项目 migration 管理。

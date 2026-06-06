@@ -13,11 +13,11 @@
 | `requestid` | `X-Request-Id` 生成、读取、写入 context |
 | `errno` | 通用业务错误类型 |
 | `response` | Gin 统一 JSON 响应 envelope |
-| `middleware` | Gin request id、access log 中间件 |
+| `middleware` | Gin request id、access log 中间件；access log 自动带常见业务 ID |
 | `db` | PostgreSQL / GORM 连接初始化和关闭；不管理 schema 和 migration |
 | `redis` | go-redis client 初始化、关闭、TTL 写入和 Redis key 基础拼接 |
 | `httpclient` | Resty HTTP client，自动透传 `X-Request-Id` |
-| `observability` | 健康检查数据结构和依赖探测 |
+| `observability` | 健康检查数据结构、依赖探测和依赖 down/recovered 日志 |
 | `event` | 跨领域事件 envelope 和 publisher 接口 |
 
 ## 使用原则
@@ -28,6 +28,8 @@
 - Redis 临时 key 必须通过带 TTL 的方法写入。
 - Redis client 关闭、TTL 写入和无业务含义的 key 拼接统一使用 `redis` 包；业务服务只保留 key 前缀、TTL 策略和失效语义。
 - 日志、HTTP client、事件发布都必须透传或打印 `request_id`。
+- HTTP access log 必须打印 `request_id`，并尽量自动带上 `brand_id`、`store_id`、`order_no` 等常见业务定位字段。
+- `/readyz` 依赖探测必须记录依赖 down 和恢复日志；额外依赖通过 `observability.Health.AddDependency` 注册。
 - 对外 API 响应必须使用统一 envelope。
 - `db` 包只负责连接初始化，不配置 `SingularTable`，不执行 `AutoMigrate`。
 - 数据库表结构、GORM model 和 migration 以 [euglena-inc/data-schema-standards](https://github.com/euglena-inc/data-schema-standards) 为准。
