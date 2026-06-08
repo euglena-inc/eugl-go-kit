@@ -11,7 +11,7 @@
 - request_id。
 - HTTP 响应封装。
 - Gin 中间件。
-- PostgreSQL / GORM 连接封装。
+- PostgreSQL / GORM / pgx 连接封装。
 - Redis client、关闭、TTL 和 key 拼接基础方法。
 - Resty HTTP client。
 - HTTP server 优雅关闭封装。
@@ -39,7 +39,7 @@
 - Access log 必须带 `request_id`，并尽量自动提取 `brand_id`、`store_id`、`order_no` 等常见排障字段。
 - 健康检查不能打印日志，`/healthz`、`/readyz` 必须从 access log 中跳过。
 - 请求错误必须打印结构化错误日志。
-- GORM 只用于数据库连接封装。
+- GORM 和 pgx 只用于数据库连接封装。
 - `db` 包必须保持 GORM 默认表名约定，不配置 `NamingStrategy.SingularTable = true`。
 - `db` 包不得执行 `AutoMigrate`，生产表结构只能由领域项目 migration 管理。
 - 数据库表结构、GORM model 和 migration 规则以 `data-schema-standards` 为准。

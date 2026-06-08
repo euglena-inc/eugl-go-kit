@@ -16,3 +16,4 @@ coverage.out
 *.pfx
 *.secret
 
+.idea

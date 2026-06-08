@@ -57,6 +57,14 @@ func HTTPStatus(code int) int {
 	}
 }
 
+func Fail(c *gin.Context, err error) {
+	appErr, ok := errno.As(err)
+	if !ok {
+		appErr = errno.New(errno.CodeInternalError, "service error")
+	}
+	Error(c, HTTPStatus(appErr.Code), appErr.Code, appErr.Message, nil)
+}
+
 func JSON(c *gin.Context, statusCode int, code int, message string, data interface{}) {
 	if data == nil {
 		data = map[string]interface{}{}
