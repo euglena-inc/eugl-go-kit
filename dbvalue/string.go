@@ -16,3 +16,10 @@ func StringValue(value *string) string {
 	}
 	return *value
 }
+
+func NullableInt64(value int64) *int64 {
+	if value <= 0 {
+		return nil
+	}
+	return &value
+}

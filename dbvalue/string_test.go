@@ -23,3 +23,16 @@ func TestStringValueReturnsEmptyForNil(t *testing.T) {
 		t.Fatalf("StringValue() = %q, want %q", got, value)
 	}
 }
+
+func TestNullableInt64ReturnsNilForNonPositive(t *testing.T) {
+	for _, value := range []int64{0, -1} {
+		if got := NullableInt64(value); got != nil {
+			t.Fatalf("NullableInt64(%d) = %#v, want nil", value, got)
+		}
+	}
+
+	got := NullableInt64(42)
+	if got == nil || *got != 42 {
+		t.Fatalf("NullableInt64(42) = %#v, want 42 pointer", got)
+	}
+}

@@ -3,6 +3,7 @@ package dbvalue
 import (
 	"database/sql/driver"
 	"fmt"
+	"strings"
 )
 
 type JSONObjectText string
@@ -21,6 +22,13 @@ func (j *JSONObjectText) Scan(value any) error {
 }
 
 type JSONArrayText string
+
+func JSONTextOrDefault(value string, fallback string) string {
+	if strings.TrimSpace(value) == "" {
+		return fallback
+	}
+	return value
+}
 
 func (j JSONArrayText) Value() (driver.Value, error) {
 	if j == "" {

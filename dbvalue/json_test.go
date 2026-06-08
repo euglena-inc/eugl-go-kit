@@ -44,3 +44,15 @@ func TestJSONTextScanAcceptsDatabaseStringTypes(t *testing.T) {
 		t.Fatalf("array = %q", array)
 	}
 }
+
+func TestJSONTextOrDefault(t *testing.T) {
+	if got := JSONTextOrDefault("", "[]"); got != "[]" {
+		t.Fatalf("JSONTextOrDefault(empty) = %q, want []", got)
+	}
+	if got := JSONTextOrDefault(" \t\n ", "{}"); got != "{}" {
+		t.Fatalf("JSONTextOrDefault(blank) = %q, want {}", got)
+	}
+	if got := JSONTextOrDefault("{}", "[]"); got != "{}" {
+		t.Fatalf("JSONTextOrDefault(value) = %q, want {}", got)
+	}
+}
