@@ -15,6 +15,8 @@
 | `response` | Gin 统一 JSON 响应 envelope |
 | `middleware` | Gin request id、access log 中间件；access log 自动带常见业务 ID |
 | `db` | PostgreSQL / GORM 连接初始化和关闭；不管理 schema 和 migration |
+| `dbvalue` | 数据库 nullable 值的无业务转换 |
+| `idgen` | 无业务含义的时间型 ID 生成器 |
 | `redis` | go-redis client 初始化、关闭、TTL 写入和 Redis key 基础拼接 |
 | `httpclient` | Resty HTTP client，自动透传 `X-Request-Id` |
 | `httpserver` | HTTP server 启动、信号退出和优雅关闭封装 |
