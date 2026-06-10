@@ -6,20 +6,66 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: eugl-go-kit-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  GOTOOLCHAIN: local
+  GOPROXY: https://goproxy.cn,direct
 
 jobs:
   check:
     runs-on: [self-hosted, linux, arm64, eugl-ci]
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        env:
+          EUGL_CHECKOUT_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          workspace="${GITHUB_WORKSPACE}"
+          archive="${RUNNER_TEMP}/source-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.tar.gz"
+          curl_config="$(mktemp)"
+          cleanup() {
+            rm -f "${archive}" "${curl_config}"
+          }
+          trap cleanup EXIT
+          rm -rf "${workspace}"
+          mkdir -p "${workspace}"
+          cat > "${curl_config}" <<CURL_CONFIG
+          location
+          fail
+          show-error
+          silent
+          connect-timeout = 20
+          max-time = 180
+          retry = 5
+          retry-delay = 5
+          retry-max-time = 600
+          retry-all-errors
+          header = "Authorization: Bearer ${EUGL_CHECKOUT_TOKEN}"
+          header = "Accept: application/vnd.github+json"
+          header = "X-GitHub-Api-Version: 2022-11-28"
+          CURL_CONFIG
+          curl --config "${curl_config}" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/tarball/${GITHUB_SHA}" \
+            --output "${archive}"
+          tar -xzf "${archive}" --strip-components=1 -C "${workspace}"
+          cd "${workspace}"
+          git init -q
+          git add -A
+          git config --global --add safe.directory "${workspace}"
 
-      - name: Setup Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: "1.25.x"
+      - name: Verify Go toolchain
+        run: |
+          go version
+          go env GOVERSION
+          go list -m >/dev/null
 
       - name: Download dependencies
         run: go mod download
