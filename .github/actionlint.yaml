@@ -1,0 +1,7 @@
+self-hosted-runner:
+  labels:
+    - eugl-ci
+    - eugl-build
+    - eugl-k8s
+    - eugl-android
+    - eugl-macos
